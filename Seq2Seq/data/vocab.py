@@ -24,7 +24,7 @@ class Vocabulary:
             raise ValueError(f"Index '{e.args[0]}' not found in vocabulary. Expected indices from 0 to {len(self)}.") from e
 
     @classmethod
-    def from_series(cls, string_series: pd.Series[str]) -> Self:
+    def from_series(cls, string_series: pd.Series) -> Self:
         """
         Given a pd series of sentences, create a vocabulary object containing translation info
         """

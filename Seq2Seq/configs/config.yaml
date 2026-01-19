@@ -1,6 +1,12 @@
 dataset:
   filter_length: 64
 
+training:
+  batch_size: 64
+  init_lr: 1.0e-3
+  num_epochs: 10
+
 
 model:
-  emb_dim:
+  emb_dim: 64
+  hidden_dim: 512

@@ -1,10 +1,6 @@
 import pandas as pd
 
-from config import load_config
-
-cfg = load_config("config.yaml")
-MAX_LEN = cfg["dataset"]["filter_length"]
-
+MAX_LEN = 64
 
 def load_and_clean_df(csv_filepath: str) -> pd.DataFrame:
     """
@@ -33,7 +29,7 @@ def load_and_clean_df(csv_filepath: str) -> pd.DataFrame:
     for c in raw_df.columns:
         raw_df[c] = raw_df[c].str.translate(table)
 
-    clean_df = raw_df.loc[raw_df[MAX_LEN].str.len() <= 63,: ].copy()
+    clean_df = raw_df.loc[raw_df["French"].str.len() <= MAX_LEN,: ].copy()
 
 
     return clean_df
