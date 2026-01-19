@@ -1,0 +1,6 @@
+dataset:
+  filter_length: 64
+
+
+model:
+  emb_dim:
