@@ -15,15 +15,18 @@ class DeepLSTMEncoder(torch.nn.Module):
         Xen = self.embedding(x)
         B, T, C = Xen.shape
 
+        # Initialise states list to (h,c) zero tensors per layer
         states = []
         for _ in range(len(self.cells)):
             h, c = torch.zeros(B, self.hidden_dim), torch.zeros(B, self.hidden_dim)
             states.append((h,c))
 
+        # Through time
         for t in range(T):
             inputx = Xen[:, t, :]
-
+            # Through layers, input to the upper layer is hidden of lower
             for i in range(len(self.cells)):
+                # Update states after passing through cell at layer i
                 h_prev, c_prev = states[i]
                 h, c = self.cells[i](inputx, (h_prev,c_prev))
                 states[i] = (h,c)

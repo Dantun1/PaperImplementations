@@ -19,7 +19,7 @@ class Vocabulary:
 
     def get_string(self, indices: Sequence[int]) -> str:
         try:
-            return [self.itos[i] for i in indices]
+            return "".join([self.itos[i] for i in indices])
         except KeyError as e:
             raise ValueError(f"Index '{e.args[0]}' not found in vocabulary. Expected indices from 0 to {len(self)}.") from e
 

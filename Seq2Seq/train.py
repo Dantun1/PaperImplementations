@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.nn.functional as F
 
@@ -8,9 +10,11 @@ from Seq2Seq.utils.config import load_config
 from Seq2Seq.utils.load_clean_df import load_and_clean_df
 from models import DeepLSTMEncoder, DeepLSTMDecoder
 
-# Model Dimensions
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-cfg = load_config("configs/config.yaml")
+# Model Dimensions
+config_path = os.path.join(BASE_DIR, "configs", "config.yaml")
+cfg = load_config(config_path)
 
 EMB_DIM = cfg["model"]["emb_dim"]
 HIDDEN_DIM = cfg["model"]["hidden_dim"]
@@ -48,24 +52,27 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
 
 # Training loop
 
+checkpoint_dir = os.path.join(BASE_DIR, "checkpoints")
+os.makedirs(checkpoint_dir, exist_ok=True)
+
 for epoch in range(NUM_EPOCHS):
     epoch_loss = 0
 
     for batch_idx, (Xbe, Xbf, Yb) in enumerate(loader):
-        # Get hidden vectors from encoder
+        # Get hidden vectors + cell states from encoder
         states = encoder(Xbe)
         # Pass through decoder to get logits
         logitsb, _ = decoder(Xbf, states)
         # Permute for torch API
         logitsb = logitsb.permute(0, 2, 1)
-        loss = F.cross_entropy(logitsb, Yb)
+        loss = F.cross_entropy(logitsb, Yb, ignore_index=french_vocab.stoi["<PAD>"])
 
         # Optimisation
         optimizer.zero_grad()
         loss.backward()
-        # Clip gradients
         torch.nn.utils.clip_grad_norm_(params, max_norm=5.0)
         optimizer.step()
+
         epoch_loss += loss.item()
 
         if batch_idx % 100 == 0:
@@ -73,6 +80,16 @@ for epoch in range(NUM_EPOCHS):
 
     avg_loss = epoch_loss / len(loader)
     scheduler.step(avg_loss)
+
+    torch.save({
+        'epoch': epoch,
+        'encoder_state_dict': encoder.state_dict(),
+        'decoder_state_dict': decoder.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': avg_loss,
+        'vocab_src': eng_vocab,
+        'vocab_tgt': french_vocab
+    }, os.path.join(checkpoint_dir, f"checkpoint_epoch_{epoch + 1}.pt"))
 
 
 
