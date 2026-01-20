@@ -27,7 +27,7 @@ french_vocab = Vocabulary.from_series(data["French"])
 encoder = DeepLSTMEncoder(len(eng_vocab), cfg["model"]["emb_dim"], cfg["model"]["hidden_dim"])
 decoder = DeepLSTMDecoder(len(french_vocab), cfg["model"]["emb_dim"], cfg["model"]["hidden_dim"])
 
-checkpoint = torch.load(CHECKPOINT_PATH)
+checkpoint = torch.load(CHECKPOINT_PATH, weights_only=False)
 encoder.load_state_dict(checkpoint['encoder_state_dict'])
 decoder.load_state_dict(checkpoint['decoder_state_dict'])
 
